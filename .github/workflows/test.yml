@@ -10,13 +10,22 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
+    - name: Stderr
+      id: error
+      run: echo "hello"
+      continue-on-error: true
     - name: Post comment
       uses: actions/github-script@v4.1.0
-      if: github.event.pull_request.merged == true
+      env:
+        out: ${{ steps.error.outputs.stdout }}
+        err: ${{ steps.error.outputs.stderr }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const output = `test`;
+          const output = `
+            out: ${process.env.err}
+            error: ${process.env.err}
+          `;
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
